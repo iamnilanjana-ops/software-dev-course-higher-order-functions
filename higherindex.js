@@ -26,7 +26,9 @@ const products = [
 // ============================================
 
 //* Task 1: Filter Products by Availability
-
+function filterProducts(productsArray, callback) {
+  return productsArray.filter(callback);
+}
 //*Create a function `filterProducts` that accepts:
 //- an array of products
 //- a callback function
@@ -38,6 +40,15 @@ const products = [
 //1. Define the `filterProducts` function with appropriate parameters.
 //2. Use the `filter()` method to apply the callback to the array.
 //3. Return the filtered result.
+
+// Example usage: filter by availability
+const inStockProducts = filterProducts(products, product => product.inStock);
+console.log("Products in stock:", inStockProducts);
+
+// Example usage: filter by price threshold
+const expensiveProducts = filterProducts(products, product => product.price >= 800);
+console.log("Products priced >= 800:", expensiveProducts);
+
 //* Task 2: Transform Product Names
 
 //Use `map()` to create a new array of product names in UPPERCASE.
@@ -47,13 +58,8 @@ const products = [
 //2. Extract and transform the `name` property to uppercase.
 //3. Store the result in a new variable.*//
 
-function filterProducts(products, callback) {
-  return products.filter(callback);
-}
-
-// Example usage
-const inStockProducts = filterProducts(products, product => product.inStock);
-console.log("Products in stock:", inStockProducts);
+const productNamesUpper = products.map(p => p.name.toUpperCase());
+console.log("Uppercase names:", productNamesUpper);
 
 
 //* Task 3: Generate Discounted Prices
@@ -68,22 +74,32 @@ console.log("Products in stock:", inStockProducts);
 //3. Use this returned function inside a `forEach()` call to add a new property, `salePrice`, to each product object.
 //4. Print the array of products to verify the new property and value have been added to each product object.*//
 
-const productNamesUpper = products.map(product => product.name.toUpperCase());
-console.log("Product names in uppercase:", productNamesUpper);
-// Step 4: Generate discounted prices
-function applyDiscount(discountPercentage) {
+function applyDiscount(discountPercent) {
+  return function(product) {
+    // Mutate the product by adding salePrice
+    product.salePrice = +(product.price * (1 - discountPercent / 100)).toFixed(2);
+    return product;
+  };
+}
+
+// Use returned function inside forEach to add salePrice to original objects
+const apply10Percent = applyDiscount(10);
+products.forEach(apply10Percent);
+
+console.log("Products after adding salePrice (10%):", products);
+// Immutable version (returns new objects; original array unchanged)
+// If you prefer not to mutate the original objects:
+function applyDiscountImmutable(discountPercent) {
   return function(product) {
     return {
-      product,
-      price: product.price * (1 - discountPercentage / 100)
+      ...product,
+      salePrice: +(product.price * (1 - discountPercent / 100)).toFixed(2)
     };
   };
 }
 
-// Example: 10% discount
-const discount10 = applyDiscount(10);
-const discountedProducts = products.map(discount10);
-console.log("Products with 10% discount:", discountedProducts);
+const discountedProductsImmutable = products.map(applyDiscountImmutable(15));
+console.log("Immutable discounted products (15%):", discountedProductsImmutable);
 // Task 4: Calculate Total Inventory Value
 
 //Use `reduce()` to calculate the total value of products that are currently in stock.
@@ -107,4 +123,13 @@ const totalValue = products
   .filter(product => product.inStock)
   .reduce((acc, product) => acc + product.price, 0);
 
-console.log("Total inventory value:", totalValue);
+console.log("Total inventory value (in stock):", totalValue);
+
+
+// Console tests summary
+// ---------------------------
+console.log("Filtered products (in stock):", inStockProducts);
+console.log("Uppercased names:", productNamesUpper);
+console.log("Discounted products (mutable, 10% added to original):", products);
+console.log("Discounted products (immutable, 15%):", discountedProductsImmutable);
+console.log("Total value in stock:", totalValue);
